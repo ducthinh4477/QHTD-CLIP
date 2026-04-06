@@ -1,0 +1,72 @@
+# ==== 1. Xoá bản hỏng (nếu có) ====
+rm -rf /kaggle/working/miniconda3
+
+# ==== 2. Tải Miniconda mới ====
+cd /kaggle/working
+wget -O Miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+# ==== 3. Cài đặt (silent mode) ====
+bash Miniconda.sh -b -p /kaggle/working/miniconda3
+
+# ==== 4. Thêm vào PATH ngay lập tức ====
+export PATH="/kaggle/working/miniconda3/bin:$PATH"
+
+# ==== 5. Load conda vào shell ====
+source /kaggle/working/miniconda3/etc/profile.d/conda.sh
+
+# ==== 6. Kiểm tra ====
+conda --version
+
+# ==== 7. Ghim để lần sau khỏi cần export lại ====
+echo 'export PATH="/kaggle/working/miniconda3/bin:$PATH"' >> ~/.bashrc
+echo 'source /kaggle/working/miniconda3/etc/profile.d/conda.sh' >> ~/.bashrc
+
+sudo apt install nvidia-utils-515 -y
+cd /kaggle/working
+git clone https://github.com/thanhquan123hi1/DeepfakeBench
+
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r\
+
+conda create -n DeepfakeBench python=3.8.2 -y
+
+conda activate DeepfakeBench
+cd DeepfakeBench
+./install.sh
+pip uninstall -y torch torchvision torchaudio
+pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Cài đặt bản chuẩn để tránh lỗi 'bool8' và lỗi 'Py_SET_REFCNT'
+pip install pyyaml timm opencv-python-headless
+pip install numpy==1.23.5
+conda install -c conda-forge python-lmdb=1.4.1 -y
+
+# Nhớ activate đúng môi trường trước
+source /kaggle/working/miniconda3/etc/profile.d/conda.sh
+conda activate DeepfakeBench
+
+# Cài các thư viện còn thiếu
+pip install pyyaml timm opencv-python-headless
+pip install numpy==1.23.5
+
+# Đảm bảo đang ở trong môi trường ảo
+source /kaggle/working/miniconda3/etc/profile.d/conda.sh
+conda activate DeepfakeBench
+
+# 1. Cài đặt công cụ hỗ trợ biên dịch
+pip install cmake
+
+# 2. Cài đặt dlib (Đợi một chút để máy biên dịch nhé)
+pip install dlib
+
+# 3. Tiện thể cài luôn bản NumPy 1.22.4 để xóa hẳn cái cảnh báo SciPy lúc nãy
+pip install numpy==1.22.4
+
+# Đảm bảo đã activate môi trường
+source /kaggle/working/miniconda3/etc/profile.d/conda.sh
+conda activate DeepfakeBench
+
+# Cài dlib từ channel conda-forge (bản này đã build sẵn, không tốn thời gian compile)
+conda install -c conda-forge dlib -y
+
+pip install --force-reinstall numpy==1.22.4

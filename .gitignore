@@ -1,0 +1,14 @@
+# Dữ liệu và Log
+DeepfakeBench/datasets/
+DeepfakeBench/logs/
+tsne_pkls/
+
+# Môi trường và Cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+miniconda3/
+
+# Checkpoint nặng
+*.pth
+ckpt_best.pth

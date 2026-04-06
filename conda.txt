@@ -1,0 +1,22 @@
+# QHTD-CLIP environment setup (effort_asy only)
+
+# 1) Create environment
+conda create -n qhtd_clip python=3.10 -y
+conda activate qhtd_clip
+
+# 2) Install PyTorch (choose one based on your machine)
+# CUDA 12.1 example
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# CPU-only example
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# 3) Install project dependencies
+cd DeepfakeBench
+bash install.sh
+
+# 4) Verify import
+python -c "from training.detectors import DETECTOR; print('effort_asy' in DETECTOR.data)"
+
+# 5) Run test quickly
+python training/test.py --detector_path ./training/config/detector/effort_asy.yaml --test_dataset Celeb-DF-v2 --weights_path ../ckpt_best.pth
