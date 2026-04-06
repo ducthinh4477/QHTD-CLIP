@@ -1,55 +1,129 @@
-# QHTD-CLIP: effort_asy for Deepfake Detection
+# QHTD-CLIP: Phát Hiện Giả Mạo Khuôn Mặt Dựa Trên CLIP
 
-Du an cuoi ky mon Toan cho Tri tue Nhan tao (HK2 2025-2026), tap trung vao mot model duy nhat: `effort_asy`.
+Đây là kho mã nguồn phục vụ **tiểu luận cuối kỳ** môn **Toán cho Trí tuệ Nhân tạo** (HK2 năm học 2025-2026), tập trung vào một mô hình duy nhất: **effort_asy**.
 
-Muc tieu cua repo nay:
-- Giu pipeline train/test cho effort_asy tu DeepfakeBench.
-- Loai bo cac detector/chuc nang benchmark khong lien quan.
-- Duy tri kha nang tai lap ket qua voi du lieu da preprocess san.
+Phiên bản hiện tại đã được tinh gọn theo định hướng học thuật và tái lập thực nghiệm, chỉ giữ lại các thành phần cần thiết cho huấn luyện và đánh giá mô hình.
 
-## Thong tin nhom
-- Truong: Dai hoc Su pham Ky thuat TP.HCM (HCMUTE)
-- Sinh vien: Nguyen Duc Thinh, Phung Le Thanh Quan
+## Mục Lục
 
-## Tom tat phuong phap
+- [1. Giới Thiệu](#1-giới-thiệu)
+- [2. Mục Tiêu Và Phạm Vi](#2-mục-tiêu-và-phạm-vi)
+- [3. Thông Tin Nhóm](#3-thông-tin-nhóm)
+- [4. Cơ Sở Phương Pháp](#4-cơ-sở-phương-pháp)
+- [5. Thiết Lập Dữ Liệu Và Cấu Hình](#5-thiết-lập-dữ-liệu-và-cấu-hình)
+- [6. Cấu Trúc Kho Mã Nguồn](#6-cấu-trúc-kho-mã-nguồn)
+- [7. Cài Đặt Môi Trường](#7-cài-đặt-môi-trường)
+- [8. Quy Trình Huấn Luyện Và Đánh Giá](#8-quy-trình-huấn-luyện-và-đánh-giá)
+- [9. Kết Quả Tham Khảo](#9-kết-quả-tham-khảo)
+- [10. Khả Năng Tái Lập](#10-khả-năng-tái-lập)
+- [11. Trích Dẫn](#11-trích-dẫn)
+
+## 1. Giới Thiệu
+
+Bài toán phát hiện giả mạo khuôn mặt đòi hỏi mô hình có khả năng tổng quát tốt giữa các miền dữ liệu khác nhau. Trong khuôn khổ đề tài, nhóm triển khai mô hình effort_asy dựa trên CLIP ViT-L/14 kết hợp cơ chế tinh chỉnh tham số hiệu quả nhằm tăng độ ổn định khi đánh giá liên miền.
+
+## 2. Mục Tiêu Và Phạm Vi
+
+### 2.1. Mục tiêu
+
+- Xây dựng pipeline huấn luyện/đánh giá gọn, rõ ràng cho effort_asy.
+- Duy trì kết quả định lượng ổn định trên các bộ kiểm thử mục tiêu.
+- Đảm bảo khả năng tái lập bằng cấu hình và mã nguồn nhất quán.
+
+### 2.2. Phạm vi
+
+- Chỉ sử dụng mô hình effort_asy.
+- Loại bỏ các detector và thành phần benchmark không liên quan.
+- Tập trung vào dữ liệu đã được tiền xử lý sẵn.
+
+## 3. Thông Tin Nhóm
+
+| Hạng mục | Nội dung |
+| --- | --- |
+| Trường | Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE) |
+| Học phần | Toán cho Trí tuệ Nhân tạo |
+| Học kỳ | HK2 năm học 2025-2026 |
+| Sinh viên 1 | Nguyễn Đức Thịnh |
+| Sinh viên 2 | Phùng Lê Thành Quân |
+
+## 4. Cơ Sở Phương Pháp
+
+### 4.1. Thành phần mô hình
+
 - Backbone: CLIP ViT-L/14 (`openai/clip-vit-large-patch14`).
-- Ky thuat tinh chinh: SVD residual adaptation tren cac lop self-attention.
-- Head: Cosine classifier.
-- Loss: Cross Entropy + Asymmetric Contrastive Loss.
+- Cơ chế thích nghi: SVD residual adaptation trên các lớp self-attention.
+- Bộ phân loại: cosine classifier.
+- Hàm mục tiêu: Cross Entropy kết hợp Asymmetric Contrastive Loss.
 
-Cong thuc tong quat:
+### 4.2. Hàm mất mát tổng
 
 $$
-\mathcal{L} = \mathcal{L}_{CE} + \lambda \mathcal{L}_{asym}
+\mathcal{L} = \mathcal{L}_{CE} + \lambda\mathcal{L}_{asym}
 $$
 
-## Cau truc repo
-- `DeepfakeBench/`: source code chay train/test effort_asy.
-- `ckpt_best.pth`: checkpoint da huan luyen.
-- `Nhom01_TLCK.pdf`: bao cao cuoi ky.
+### 4.3. Luồng xử lý tổng quát
 
-## Yeu cau du lieu
-Repo nay gia dinh du lieu da preprocess san:
-- Thu muc anh: `DeepfakeBench/datasets/rgb` (co the sua trong config).
-- JSON metadata: `DeepfakeBench/preprocessing/dataset_json`.
+```mermaid
+flowchart LR
+    A[Khung hình đầu vào] --> B[CLIP ViT-L/14]
+    B --> C[SVD Residual Adaptation]
+    C --> D[Chuẩn hóa đặc trưng L2]
+    D --> E[Cosine Classifier]
+    E --> F[Xác suất Real/Fake]
+    D --> G[Asymmetric Contrastive Loss]
+    E --> H[Cross Entropy Loss]
+    G --> I[Tổng hàm mất mát]
+    H --> I
+```
 
-File cau hinh lien quan:
+## 5. Thiết Lập Dữ Liệu Và Cấu Hình
+
+Kho mã nguồn giả định dữ liệu đã được tiền xử lý:
+
+- Thư mục ảnh: `DeepfakeBench/datasets/rgb`
+- Thư mục metadata JSON: `DeepfakeBench/preprocessing/dataset_json`
+
+Các tệp cấu hình chính:
+
 - `DeepfakeBench/training/config/detector/effort_asy.yaml`
 - `DeepfakeBench/training/config/train_config.yaml`
 - `DeepfakeBench/training/config/test_config.yaml`
 
-## Cai dat moi truong
-Xem huong dan nhanh trong `conda.txt`.
+## 6. Cấu Trúc Kho Mã Nguồn
 
-Neu da o thu muc root repo:
+```text
+QHTD-CLIP/
+|- README.md
+|- conda.txt
+|- ckpt_best.pth
+|- Nhom01_TLCK.pdf
+`- DeepfakeBench/
+   |- train.sh
+   |- test.sh
+   |- training/
+   |  |- train.py
+   |  |- test.py
+   |  |- detectors/effort_asy.py
+   |  |- dataset/
+   |  |- config/
+   |  `- trainer/
+   `- preprocessing/dataset_json/
+```
+
+## 7. Cài Đặt Môi Trường
+
+Tham khảo hướng dẫn đầy đủ trong `conda.txt`.
+
+Cài đặt nhanh:
 
 ```bash
 cd DeepfakeBench
 bash install.sh
 ```
 
-## Lenh train
-Tu thu muc root repo:
+## 8. Quy Trình Huấn Luyện Và Đánh Giá
+
+### 8.1. Huấn luyện
 
 ```bash
 cd DeepfakeBench
@@ -59,8 +133,7 @@ python training/train.py \
   --test_dataset "Celeb-DF-v2" "FaceShifter" "DeeperForensics-1.0"
 ```
 
-## Lenh test
-Tu thu muc root repo:
+### 8.2. Đánh giá với checkpoint có sẵn
 
 ```bash
 cd DeepfakeBench
@@ -70,22 +143,25 @@ python training/test.py \
   --weights_path ../ckpt_best.pth
 ```
 
-## Ket qua tham khao
-- Cross-dataset AUC trung binh: 0.9392
-- In-domain AUC trung binh (FF++): 99.05
-- So tham so train duoc: 0.19M
+## 9. Kết Quả Tham Khảo
 
-## Luu y tai lap
-- Gan duong dan du lieu dung trong `train_config.yaml` va `test_config.yaml`.
-- Lan dau chay se tai CLIP tu HuggingFace.
-- Neu khong co Internet, can cache model truoc.
+- AUC trung bình liên miền (cross-dataset): **0.9392**
+- AUC trung bình nội miền (FF++): **99.05**
+- Số tham số được huấn luyện: **0.19M**
 
-## Citation
+## 10. Khả Năng Tái Lập
+
+- Cập nhật đúng đường dẫn dữ liệu trong `train_config.yaml` và `test_config.yaml`.
+- Lần chạy đầu tiên cần tải trọng số CLIP từ HuggingFace.
+- Nếu môi trường ngoại tuyến, cần chuẩn bị cache mô hình trước.
+
+## 11. Trích Dẫn
+
 ```bibtex
 @article{nguyenphung2026qhtd,
-  title={Ung dung SVD bao toan khong gian dac trung khi tai huan luyen mo hinh cho bai toan phan loai anh gia khuon mat},
-  author={Nguyen Duc Thinh and Phung Le Thanh Quan},
-  journal={Tieu luan ket thuc hoc phan Toan cho Tri tue Nhan tao - HCMUTE},
+  title={Ứng dụng SVD bảo toàn không gian đặc trưng khi tái huấn luyện mô hình cho bài toán phân loại ảnh giả khuôn mặt},
+  author={Nguyễn Đức Thịnh and Phùng Lê Thành Quân},
+  journal={Tiểu luận kết thúc học phần Toán cho Trí tuệ Nhân tạo - HCMUTE},
   year={2026}
 }
 ```
