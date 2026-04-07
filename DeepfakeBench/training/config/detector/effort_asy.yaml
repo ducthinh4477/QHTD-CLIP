@@ -1,5 +1,5 @@
 # log dir
-log_dir: ./logs
+log_dir: /kaggle/working/DeepfakeBench_outputs
 
 # model setting
 pretrained: null
@@ -42,7 +42,7 @@ train_dataset: [FaceForensics++]
 test_dataset: [Celeb-DF-v2, FaceShifter, DeeperForensics-1.0]
 
 compression: c23
-train_batchSize: 64
+train_batchSize: 8
 test_batchSize: 128
 workers: 8
 frame_num:
@@ -85,11 +85,11 @@ optimizer:
 lr_scheduler: cosine
 lr_T_max: 10
 lr_eta_min: 0.00001
-nEpochs: 15
+nEpochs: 10
 start_epoch: 0
 save_epoch: 1
 rec_iter: 100
-logdir: ./logs
+logdir: /kaggle/working/DeepfakeBench_outputs
 manualSeed: 1024
 save_ckpt: true
 save_feat: true

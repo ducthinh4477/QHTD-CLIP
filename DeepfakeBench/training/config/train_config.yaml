@@ -1,12 +1,12 @@
 mode: train
 lmdb: false
 dry_run: false
-rgb_dir: './datasets/rgb'
+rgb_dir: '/kaggle/working/rgb'
 lmdb_dir:  './datasets/lmdb'
-dataset_json_folder: './preprocessing/dataset_json'
+dataset_json_folder: '/kaggle/working/QHTD-CLIP/DeepfakeBench/preprocessing/dataset_json'
 SWA: False
 save_avg: True
-log_dir: ./logs
+log_dir: /kaggle/working/DeepfakeBench_outputs
 # label settings
 label_dict:
   # DFD
